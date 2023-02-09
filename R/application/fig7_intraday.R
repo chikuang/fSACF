@@ -1,18 +1,12 @@
-library(readr)
-library(pbapply)
-library(lubridate)
-library(ggplot2)
-library(scales)
-source("./util.R")
-theme_set(theme_bw())
+pacman::p_load(readr, pbapply, lubridate, ggplot2, scales)
+source("./R/util.R")
 theme_update(plot.title = element_text(hjust = 0.5, size = 20),
-             # legend.position = "none",
              legend.background = element_rect(fill = "white", color = "black"),
              legend.text = element_text(size=16),
              legend.title = element_blank(),
              axis.text = element_text(size = 12),
              axis.title = element_text(size = 16))
-
+alpha <- 0.05
 scale2 <- function(x, na.rm = FALSE) (x * 100)
 
 df_stock <- read_csv("./data/stock_data.csv") %>% 
@@ -62,7 +56,7 @@ calc_dacf <- function(my_df, stock, alpha, H){
            ub = qnorm(1 - alpha/2) * std_0_cen/sqrt(N))
 }  
 
-alpha <- 0.05
+
 
 # sp_Ret, ec_Ret, cl_Ret, aapl_Ret, 
 # sp_Ret2, ec_Ret2, cl_Ret2, aapl_Ret2
