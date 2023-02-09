@@ -15,7 +15,7 @@ This folder contains the code to reproduce the figures presented on the manuscri
 
 Section 4: Applications
 
-Fig 5: Spanish electricity data, detrended electricitiy data, and their corresponding fACF and fSACF
+Fig 5: Spanish electricity data, detrended electricity data, and their corresponding fACF and fSACF
 
 Fig 6: Portmanteau test of the series
 
