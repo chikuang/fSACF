@@ -1,5 +1,4 @@
-source("./util.R")
-theme_set(theme_bw())
+source("./R/util.R")
 pacman::p_load(fdaACF, ggplot2, tibble, dplyr, tidyr, forcats, latex2exp,
                forecast, fda)
 theme_update(plot.title = element_text(hjust = 0.5, size = 18),
@@ -18,43 +17,49 @@ H <- 20
 s <- seq(0, 1, length.out = 24)
 basis <- create.bspline.basis(c(0, 1), nbasis = 24, norder = 4)
 fdX <- Data2fd(argvals = s, t(X), basis)
-p <- 5
-fdXpca <- pca.fd(fdX, nharm = p)
-cumsum(fdXpca$varprop)
+p <- 5 # number of principal components (PC)
+
+fdXpca <- pca.fd(fdX, nharm = p) 
+# cumsum(fdXpca$varprop) 0.6030712 0.8344394 0.9221534 0.9433146 0.9592172
 
 N <- nrow(X)
-
 score_1 <- ts(fdXpca$scores[, 1], frequency = 7)
 score_2 <- ts(fdXpca$scores[, 2], frequency = 7)
 score_3 <- ts(fdXpca$scores[, 3], frequency = 7)
 score_4 <- ts(fdXpca$scores[, 4], frequency = 7)
 score_5 <- ts(fdXpca$scores[, 5], frequency = 7)
 
+
+## fit ARIMA models on each of the scores
 mod1 <- auto.arima(score_1)
 mod2 <- auto.arima(score_2)
 mod3 <- auto.arima(score_3)
 mod4 <- auto.arima(score_4)
 mod5 <- auto.arima(score_5)
+
+## check fitted residuals
+## the third component seems to have some dependence leftover
 checkresiduals(mod1)
 checkresiduals(mod2)
 checkresiduals(mod3)
 checkresiduals(mod4)
 checkresiduals(mod5)
 
+## Extracting the fitted values
 coef_fitted_fpc1 <- mod1$fitted
 coef_fitted_fpc2 <- cbind(mod1$fitted, mod2$fitted)
 coef_fitted_fpc3 <- cbind(mod1$fitted, mod2$fitted, mod3$fitted)
 coef_fitted_fpc4 <- cbind(mod1$fitted, mod2$fitted, mod3$fitted, mod4$fitted)
 coef_fitted_fpc5 <- cbind(mod1$fitted, mod2$fitted, mod3$fitted, mod4$fitted, mod5$fitted)
 
-
+## obtain the fitted values using P number o
 my_fitted_fpc1 <-  t(fdXpca$harmonics$coefs[,1] %*% t(coef_fitted_fpc1))
 my_fitted_fpc2 <-  t(fdXpca$harmonics$coefs[,1:2] %*% t(coef_fitted_fpc2))
 my_fitted_fpc3 <-  t(fdXpca$harmonics$coefs[,1:3] %*% t(coef_fitted_fpc3))
 my_fitted_fpc4 <-  t(fdXpca$harmonics$coefs[,1:4] %*% t(coef_fitted_fpc4))
 my_fitted_fpc5 <-  t(fdXpca$harmonics$coefs[,1:5] %*% t(coef_fitted_fpc5))
 
-
+## obtain the residuals
 my_resid_fpc1 <- X - my_fitted_fpc1
 my_resid_fpc2 <- X - my_fitted_fpc2
 my_resid_fpc3 <- X - my_fitted_fpc3
@@ -175,13 +180,9 @@ res_FSAR <- calc_BP_test(rho = res_fit_FSAR$rho_cen, H = H,
 
 
 df_res <- inner_join(res_1, res_3, by = "lag") %>%
-  # inner_join(res_1, by = "lag") %>%
-  # inner_join(res_4, by = "lag") %>%
   inner_join(res_5, by = "lag") %>%
   inner_join(res_raw, by = "lag") %>% 
-  inner_join(res_FSAR, by = "lag") %>% 
-  # inner_join(res_10, by = "lag") %>%
-  # filter(lag %in% c(20:23)) %>% 
+  inner_join(res_FSAR, by = "lag") %>%
   dplyr::select(lag, starts_with("pval_"))
 
 
