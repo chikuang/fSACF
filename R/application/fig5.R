@@ -1,9 +1,9 @@
-#' @Compare_to_Mestre_2021
+#' The code to reproduce the plots in Figure 5.
+
 # Load the electricity data -----------------------------------------------
 pacman::p_load(fdaACF, ggplot2, tibble, dplyr, 
                tidyr, forcats, latex2exp, kableExtra)
-source("./util.R")
-theme_set(theme_bw())
+source("./R/util.R")
 theme_update(plot.title = element_text(hjust = 0.5, size = 18),
              legend.text = element_text(size = 14),
              legend.title = element_blank(),
@@ -33,6 +33,7 @@ plot_Y_diff
 
 
 # Plot fACF ---------------------------------------------------------------
+H <- 20
 fACF_obs <- obtain_FACF(Y = as.matrix(elec_prices),
                     v = 1:24,
                     nlags = H,
